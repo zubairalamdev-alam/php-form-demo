@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name  = htmlspecialchars($_POST["name"]);
     $email = htmlspecialchars($_POST["email"]);
 
-    $message = "Thanks Bhai, $name! We got your email: $email";
+     $message = "Thanks Bhai jaan, $name! We got your email: $email";
 }
 ?>
 
