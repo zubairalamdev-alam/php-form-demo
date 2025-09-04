@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name  = htmlspecialchars($_POST["name"]);
     $email = htmlspecialchars($_POST["email"]);
 
-    $message = "Thanks, $name! We got your email: $email";
+    $message = "Thanks Bhai, $name! We got your email: $email";
 }
 ?>
 
@@ -26,6 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <h2>Contact Form</h2>
     <form method="POST">
         <input type="text" name="name" placeholder="Enter your name" required>
+        <input type="text" name="phone" placeholder="Enter your phone number">
         <input type="email" name="email" placeholder="Enter your email" required>
         <button type="submit">Submit</button>
     </form>
