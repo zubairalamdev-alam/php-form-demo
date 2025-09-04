@@ -1,0 +1,14 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# PHP / Composer
+/vendor/
+/composer.phar
+composer.lock
+
+# Env & cache
+.env
+.cache/
