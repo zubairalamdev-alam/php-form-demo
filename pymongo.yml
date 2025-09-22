@@ -1,0 +1,5 @@
+    - name: Install pymongo (needed for Ansible MongoDB modules)
+      ansible.builtin.apt:
+        name: python3-pymongo
+        state: present
+

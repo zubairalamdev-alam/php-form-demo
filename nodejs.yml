@@ -1,0 +1,72 @@
+---
+- name: Install Node.js and deploy a sample app
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Update apt cache (Ubuntu/Debian)
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - curl
+          - gnupg
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Add NodeSource repository
+      ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+      args:
+        executable: /bin/bash
+      when: ansible_os_family == "Debian"
+
+    - name: Install Node.js
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install PM2 (process manager)
+      ansible.builtin.npm:
+        name: pm2
+        global: yes
+
+    - name: Create app directory
+      ansible.builtin.file:
+        path: /home/ubuntu/nodeapp
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Copy sample Node.js app
+      ansible.builtin.copy:
+        dest: /home/ubuntu/nodeapp/app.js
+        content: |
+          const http = require('http');
+          const port = 3000;
+          const server = http.createServer((req, res) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Hello World from Ansible + Node.js!');
+          });
+          server.listen(port, () => {
+            console.log(`Server running at http://0.0.0.0:${port}/`);
+          });
+
+    - name: Start app with PM2
+      ansible.builtin.shell: pm2 start /home/ubuntu/nodeapp/app.js --name nodeapp
+      args:
+        chdir: /home/ubuntu/nodeapp
+      become_user: ubuntu
+
+    - name: Save PM2 process list (autostart)
+      ansible.builtin.shell: pm2 save
+      become_user: ubuntu
+
+    - name: Enable PM2 startup
+      ansible.builtin.shell: pm2 startup systemd -u ubuntu --hp /home/ubuntu
+

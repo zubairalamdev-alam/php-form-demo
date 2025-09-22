@@ -1,0 +1,51 @@
+---
+- name: Install and configure MongoDB
+  hosts: webserver
+  become: yes
+  vars:
+    mongodb_database: "testdb"
+    mongodb_user: "testuser"
+    mongodb_password: "UserPass123"
+
+  tasks:
+    - name: Import MongoDB public GPG Key
+      ansible.builtin.apt_key:
+        url: https://www.mongodb.org/static/pgp/server-6.0.asc
+        state: present
+
+    - name: Add MongoDB repository
+      ansible.builtin.apt_repository:
+        repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ 
+ansible_distribution_release }}/mongodb-org/6.0 multiverse"
+        state: present
+        filename: mongodb-org-6.0
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install MongoDB
+      ansible.builtin.apt:
+        name: mongodb-org
+        state: present
+
+    - name: Enable and start MongoDB service
+      ansible.builtin.service:
+        name: mongod
+        state: started
+        enabled: yes
+
+    # --- Manual DB + User creation using mongosh ---
+    - name: Create MongoDB user manually
+      ansible.builtin.shell: |
+        mongosh admin --eval '
+          db = db.getSiblingDB("{{ mongodb_database }}");
+          db.createUser({
+            user: "{{ mongodb_user }}",
+            pwd: "{{ mongodb_password }}",
+            roles: [ { role: "readWrite", db: "{{ mongodb_database }}" } ]
+          });
+        '
+      args:
+        executable: /bin/bash
+
